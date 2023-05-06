@@ -33,6 +33,10 @@ function App() {
 					</ul>
 				</nav>
 
+				<div className='productHome'>
+					<h1>Product Home</h1>
+				</div>
+
 				<Routes>
 					<Route path='/' element={<Homepage />} />
 					<Route path='/signup' element={<SignUp />} />

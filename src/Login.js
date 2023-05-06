@@ -22,7 +22,11 @@ const Login = () => {
 			const data = await response.json();
 			console.log('Access Token:', data.access_token);
 			// You can save the access token to localStorage or in your app state
-			navigate('/');
+			if (data.user_type === 'vendor') {
+				navigate('/vendor-dashboard');
+			} else {
+				navigate('/');
+			}
 		} else {
 			console.error('Invalid login');
 		}
