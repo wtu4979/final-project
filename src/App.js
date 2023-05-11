@@ -1,113 +1,129 @@
-import "./App.css";
+import './App.css';
 import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Switch,
-  Link,
-  useNavigate,
-} from "react-router-dom";
-import Homepage from "./Homepage";
-import SignUp from "./SignUp";
-import Login from "./Login";
-import VendorDashboard from "./VendorDashboard";
-import React, { useState, useEffect } from "react";
+	BrowserRouter as Router,
+	Route,
+	Routes,
+	Switch,
+	Link,
+	useNavigate,
+} from 'react-router-dom';
+import Homepage from './Homepage';
+import SignUp from './SignUp';
+import Login from './Login';
+import VendorDashboard from './VendorDashboard';
+import Checkout from './Checkout';
+import React, { useState, useEffect } from 'react';
 
 // Material UI components
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Badge from "@mui/material/Badge";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Badge from '@mui/material/Badge';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 function App() {
-  const [loggedIn, setIsLoggedIn] = useState(false);
-  const [userType, setUserType] = useState("");
-  const [cartItemCount, setCartItemCount] = useState(0);
+	const [loggedIn, setIsLoggedIn] = useState(false);
+	const [userType, setUserType] = useState('');
+	const [cartItemCount, setCartItemCount] = useState(0);
 
-  const handleLoginState = (state, type) => {
-    setIsLoggedIn(state);
-    setUserType(type);
-  };
+	const handleLoginState = (state, type) => {
+		setIsLoggedIn(state);
+		setUserType(type);
+	};
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    setIsLoggedIn(false);
-  };
+	const handleLogout = () => {
+		localStorage.removeItem('access_token');
+		setIsLoggedIn(false);
+	};
 
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+	useEffect(() => {
+		const token = localStorage.getItem('access_token');
+		if (token) {
+			fetch('http://127.0.0.1:5000/shopping-cart', {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					const totalQuantity = data.items.reduce(
+						(sum, item) => sum + item.quantity,
+						0
+					);
+					setCartItemCount(totalQuantity);
+				});
+		}
+	}, []);
 
-  return (
-    <Router>
-      <div className="App">
-        <AppBar position="static">
-          <Toolbar>
-            <Button color="inherit">
-              <Link to="/" className="nav-link">
-                Home
-              </Link>
-            </Button>
-            {loggedIn ? (
-              <Button color="inherit" onClick={() => handleLogout()}>
-                Logout
-              </Button>
-            ) : (
-              <>
-                <Button color="inherit">
-                  <Link to="/signup" className="nav-link">
-                    Sign Up
-                  </Link>
-                </Button>
-                <Button color="inherit">
-                  <Link to="/login" className="nav-link">
-                    Login
-                  </Link>
-                </Button>
-              </>
-            )}
-            {loggedIn && userType === "vendor" ? (
-              <Button color="inherit">
-                <Link to="/vendor-dashboard" className="nav-link">
-                  Vendor Dashboard
-                </Link>
-              </Button>
-            ) : null}
-            <Badge color="error" badgeContent={cartItemCount}>
-              <ShoppingCartIcon />
-            </Badge>
-          </Toolbar>
-        </AppBar>
+	return (
+		<Router>
+			<div className='App'>
+				<AppBar position='static'>
+					<Toolbar>
+						<Button color='inherit'>
+							<Link to='/' className='nav-link'>
+								Home
+							</Link>
+						</Button>
+						{loggedIn ? (
+							<Button color='inherit' onClick={() => handleLogout()}>
+								Logout
+							</Button>
+						) : (
+							<>
+								<Button color='inherit'>
+									<Link to='/signup' className='nav-link'>
+										Sign Up
+									</Link>
+								</Button>
+								<Button color='inherit'>
+									<Link to='/login' className='nav-link'>
+										Login
+									</Link>
+								</Button>
+							</>
+						)}
+						{loggedIn && userType === 'vendor' ? (
+							<Button color='inherit'>
+								<Link to='/vendor-dashboard' className='nav-link'>
+									Vendor Dashboard
+								</Link>
+							</Button>
+						) : null}
+						<Badge color='error' badgeContent={cartItemCount}>
+							<Link to='/checkout' className='nav-link'>
+								<ShoppingCartIcon />
+							</Link>
+						</Badge>
+					</Toolbar>
+				</AppBar>
 
-        <Routes>
-          <Route
-            path="/"
-            element={<Homepage onAddToCart={setCartItemCount} />}
-          />
-          <Route path="/signup" element={<SignUp />} />
-          <Route
-            path="/login"
-            element={
-              <Login
-                onLogin={(userType) => {
-                  handleLoginState(true, userType);
-                }}
-              />
-            }
-          />
+				<Routes>
+					<Route
+						path='/'
+						element={<Homepage onAddToCart={setCartItemCount} />}
+					/>
+					<Route path='/signup' element={<SignUp />} />
+					<Route
+						path='/login'
+						element={
+							<Login
+								onLogin={(userType) => {
+									handleLoginState(true, userType);
+								}}
+							/>
+						}
+					/>
 
-          <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+					<Route path='/vendor-dashboard' element={<VendorDashboard />} />
+					<Route path='/checkout' element={<Checkout />} />
 
-          {/* Add other routes here */}
-        </Routes>
-      </div>
-    </Router>
-  );
+					{/* Add other routes here */}
+				</Routes>
+			</div>
+		</Router>
+	);
 }
 
 export default App;
