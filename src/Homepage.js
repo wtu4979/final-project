@@ -63,33 +63,51 @@ function Homepage({ onAddToCart }) {
 				</Alert>
 			</Snackbar>
 			<Grid container spacing={3}>
-				{products.map((product) => (
-					<Grid item key={product.id} xs={12} sm={6} md={4}>
-						<Card>
-							<CardContent>
-								<Typography variant='h5' component='div'>
-									{product.name}
-								</Typography>
-								<Typography variant='body2' color='text.secondary'>
-									{product.description}
-								</Typography>
-								<Typography variant='subtitle1' color='text.primary'>
-									${product.price}
-								</Typography>
-								<Typography variant='subtitle1' color='text.primary'>
-									Sold by: {product.vendor_name}
-								</Typography>
-								<IconButton
-									color='primary'
-									onClick={() => addToCart(product)}
-									aria-label='Add to cart'
-								>
-									<AddShoppingCart />
-								</IconButton>
-							</CardContent>
-						</Card>
+				{products.length ? (
+					products.map((product) => (
+						<Grid item key={product.id} xs={12} sm={6} md={4}>
+							<Card>
+								<CardContent>
+									<Typography variant='h5' component='div'>
+										{product.name}
+									</Typography>
+									<Typography variant='body2' color='text.secondary'>
+										{product.description}
+									</Typography>
+									<Typography variant='subtitle1' color='text.primary'>
+										${product.price}
+									</Typography>
+									<Typography variant='subtitle1' color='text.primary'>
+										Sold by: {product.vendor_name}
+									</Typography>
+									<IconButton
+										color='primary'
+										onClick={() => addToCart(product)}
+										aria-label='Add to cart'
+									>
+										<AddShoppingCart />
+									</IconButton>
+								</CardContent>
+							</Card>
+						</Grid>
+					))
+				) : (
+					<Grid
+						container
+						spacing={0}
+						direction='column'
+						alignItems='center'
+						justify='center'
+						style={{ minHeight: '100vh' }}
+						mt={10}
+					>
+						<Grid item xs={3}>
+							<Alert severity='info' variant='filled'>
+								There are no products for sale, please check again later!
+							</Alert>
+						</Grid>
 					</Grid>
-				))}
+				)}
 			</Grid>
 		</div>
 	);
