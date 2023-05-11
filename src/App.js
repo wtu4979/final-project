@@ -92,9 +92,15 @@ function App() {
 							</Button>
 						) : null}
 						<Badge color='error' badgeContent={cartItemCount}>
-							<Link to='/checkout' className='nav-link'>
-								<ShoppingCartIcon />
-							</Link>
+							{cartItemCount > 0 ? (
+								<Link to='/checkout' className='nav-link'>
+									<ShoppingCartIcon />
+								</Link>
+							) : (
+								<div className='nav-link'>
+									<ShoppingCartIcon />
+								</div>
+							)}
 						</Badge>
 					</Toolbar>
 				</AppBar>

@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.sql import func
+from sqlalchemy import Numeric, DECIMAL
 
 
 app = Flask(__name__)
@@ -28,6 +29,7 @@ class User(db.Model):
     password = db.Column(db.String(120), nullable=False)
     user_type = db.Column(db.String(10), nullable=False)
     vendor_name = db.Column(db.String(80), nullable=True)
+    vendor_revenue = db.Column(DECIMAL(10, 2), nullable=True, default=0.00)
     products = db.relationship('Product', backref='vendor', lazy=True)
     shopping_cart_items = db.relationship('ShoppingCartItem', backref='user', lazy=True)
 
@@ -107,6 +109,9 @@ def users():
         user_data['password'] = user.password
         user_data['user_type'] = user.user_type
         user_data['vendor_name'] = user.vendor_name
+        user_data['vendor_revenue'] = user.vendor_revenue
+        user_data['products'] = user.products
+        user_data['shopping_cart_items'] = user.shopping_cart_items
         output.append(user_data)
     return jsonify({'users': output})
 
