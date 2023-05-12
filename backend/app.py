@@ -11,6 +11,7 @@ from flask_jwt_extended import JWTManager, create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.sql import func
 from sqlalchemy import Numeric, DECIMAL
+from decimal import Decimal
 
 
 app = Flask(__name__)
@@ -23,6 +24,14 @@ app.config['JWT_SECRET_KEY'] = 'your_secret_key'  # Replace with a secure secret
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
 
+class Sale(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    vendor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    customer_name = db.Column(db.String(80), nullable=False)
+    product_name = db.Column(db.String(120), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    total_price = db.Column(DECIMAL(10, 2), nullable=False)
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -32,6 +41,8 @@ class User(db.Model):
     vendor_revenue = db.Column(DECIMAL(10, 2), nullable=True, default=0.00)
     products = db.relationship('Product', backref='vendor', lazy=True)
     shopping_cart_items = db.relationship('ShoppingCartItem', backref='user', lazy=True)
+    sales = db.relationship('Sale', backref='vendor', lazy=True)
+
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -233,7 +244,78 @@ def get_user_cart_info():
 
     return jsonify({'cart': cart_items})
 
+@app.route('/place-order', methods=['POST'])
+@jwt_required()
+def place_order():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    cart_items = ShoppingCartItem.query.filter_by(user_id=user_id).all()
 
+    if not cart_items:
+        return jsonify({'message': 'Shopping cart is empty'}), 400
+
+    vendor_purchases = {}
+
+    for item in cart_items:
+        product = Product.query.get(item.product_id)
+        if product is None:
+            continue
+
+        vendor_id = product.vendor_id
+        vendor = User.query.get(vendor_id)
+
+        sale = Sale(vendor_id=vendor_id, customer_name=user.username, product_name=product.name, quantity=item.quantity, total_price=product.price * item.quantity)
+        db.session.add(sale)
+
+        if vendor_id in vendor_purchases:
+            vendor_purchases[vendor_id]['total'] += product.price * item.quantity
+            vendor_purchases[vendor_id]['products'].append(product.name)
+        else:
+            vendor_purchases[vendor_id] = {
+                'vendor_name': vendor.vendor_name,
+                'total': product.price * item.quantity,
+                'products': [product.name]
+            }
+
+        vendor.vendor_revenue += Decimal(product.price) * Decimal(item.quantity)
+        db.session.delete(item)
+
+    db.session.commit()
+
+    return jsonify(vendor_purchases)
+
+
+@app.route('/get-vendor-revenue', methods=['GET'])
+@jwt_required()
+def get_vendor_revenue():
+    vendor_id = get_jwt_identity()
+    vendor = User.query.get(vendor_id)
+    if vendor is None:
+        return jsonify({'error': 'Vendor not found'}), 404
+
+    print(f"Vendor ID: {vendor.id}, Vendor Name: {vendor.vendor_name}, Vendor Revenue: {vendor.vendor_revenue}")
+
+    return jsonify({'vendor_name': vendor.vendor_name, 'vendor_revenue': str(vendor.vendor_revenue)})
+
+@app.route('/get_sales', methods=['GET'])
+@jwt_required()
+def get_all_sales():
+    sales = Sale.query.all()
+    output = []
+
+    for sale in sales:
+        sale_data = {}
+        sale_data['id'] = sale.id
+        sale_data['vendor_id'] = sale.vendor_id
+        sale_data['customer_name'] = sale.customer_name
+        sale_data['product_name'] = sale.product_name
+        sale_data['quantity'] = sale.quantity
+        sale_data['total_price'] = str(sale.total_price)
+        output.append(sale_data)
+
+    print(output)
+
+    return jsonify({'sales': output})
 
 
 if __name__ == '__main__':

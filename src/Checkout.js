@@ -57,9 +57,23 @@ const Checkout = () => {
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				setCartItems(data.cart);
+				// Consolidate cart items
+				const consolidatedCartItems = data.cart.reduce((acc, item) => {
+					const foundItem = acc.find(
+						(accItem) =>
+							accItem.product_name === item.product_name &&
+							accItem.vendor_name === item.vendor_name
+					);
+					if (foundItem) {
+						foundItem.quantity += item.quantity;
+					} else {
+						acc.push(item);
+					}
+					return acc;
+				}, []);
+				setCartItems(consolidatedCartItems);
 				let total = 0;
-				data.cart.forEach((item) => {
+				consolidatedCartItems.forEach((item) => {
 					total += item.product_price * item.quantity;
 				});
 				setTotalPrice(total);
@@ -79,6 +93,7 @@ const Checkout = () => {
 							<Card>
 								<CardContent>
 									<Typography variant='h5'>{item.product_name}</Typography>
+									<Typography variant='hf'>{item.vendor_name}</Typography>
 									<Typography variant='body2' color='text.secondary'>
 										{item.product_description}
 									</Typography>
@@ -102,7 +117,28 @@ const Checkout = () => {
 				<Box mt={3}>
 					<Typography variant='h5'>Total: ${totalPrice.toFixed(2)}</Typography>
 
-					<Button variant='contained' color='primary' fullWidth>
+					<Button
+						variant='contained'
+						color='primary'
+						fullWidth
+						onClick={() => {
+							const token = localStorage.getItem('access_token');
+							fetch('http://127.0.0.1:5000/place-order', {
+								method: 'POST',
+								headers: {
+									Authorization: `Bearer ${token}`,
+								},
+							})
+								.then((response) => response.json())
+								.then((data) => {
+									console.log(data);
+									// Handle the response data here
+									setCartItems([]);
+									setTotalPrice(0);
+								})
+								.catch((error) => console.error('Error:', error));
+						}}
+					>
 						Place Order
 					</Button>
 				</Box>
