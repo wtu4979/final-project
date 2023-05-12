@@ -31,6 +31,8 @@ class Sale(db.Model):
     product_name = db.Column(db.String(120), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     total_price = db.Column(DECIMAL(10, 2), nullable=False)
+    status = db.Column(db.String(20), default='Processing')
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -311,11 +313,57 @@ def get_all_sales():
         sale_data['product_name'] = sale.product_name
         sale_data['quantity'] = sale.quantity
         sale_data['total_price'] = str(sale.total_price)
+        sale_data['status'] = sale.status
         output.append(sale_data)
 
     print(output)
 
     return jsonify({'sales': output})
+
+@app.route('/change_status_to_shipping/<int:sale_id>', methods=['POST'])
+@jwt_required()
+def change_status_to_shipping(sale_id):
+    sale = Sale.query.get(sale_id)
+    if sale is None:
+        return jsonify({'error': 'Sale not found'}), 404
+
+    if sale.status == 'Shipped':
+        return jsonify({'error': 'Sale is already in shipping status'}), 400
+
+    sale.status = 'Shipped'
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Sale status changed to shipping'}), 200
+
+@app.route('/get_orders', methods=['GET'])
+@jwt_required()
+def get_orders():
+    user_id = get_jwt_identity() 
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({'error': 'User not found'}), 404
+
+    orders = Sale.query.filter_by(customer_name=user.username).all() 
+    output = []
+
+    for order in orders:
+        order_data = {}
+        order_data['id'] = order.id
+                # Get vendor for the order
+        vendor = User.query.get(order.vendor_id)
+        if vendor is None:
+            order_data['vendor_name'] = 'Vendor not found'
+        else:
+            order_data['vendor_name'] = vendor.vendor_name
+        order_data['vendor_id'] = order.vendor_id
+        order_data['product_name'] = order.product_name
+        order_data['quantity'] = order.quantity
+        order_data['total_price'] = str(order.total_price)
+        order_data['status'] = order.status
+        output.append(order_data)
+
+    return jsonify({'orders': output})
+
 
 
 if __name__ == '__main__':

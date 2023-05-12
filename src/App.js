@@ -12,6 +12,8 @@ import SignUp from './SignUp';
 import Login from './Login';
 import VendorDashboard from './VendorDashboard';
 import Checkout from './Checkout';
+import OrderHistory from './OrderHistory';
+
 import React, { useState, useEffect } from 'react';
 
 // Material UI components
@@ -27,6 +29,8 @@ function App() {
 	const [userType, setUserType] = useState('');
 	const [cartItemCount, setCartItemCount] = useState(0);
 
+	const resetCartItemCount = () => setCartItemCount(0);
+
 	const handleLoginState = (state, type) => {
 		setIsLoggedIn(state);
 		setUserType(type);
@@ -35,26 +39,28 @@ function App() {
 	const handleLogout = () => {
 		localStorage.removeItem('access_token');
 		setIsLoggedIn(false);
+		setCartItemCount(0);
 	};
 
 	useEffect(() => {
-		const token = localStorage.getItem('access_token');
-		if (token) {
-			fetch('http://127.0.0.1:5000/shopping-cart', {
+		if (loggedIn) {
+			const token = localStorage.getItem('access_token');
+			fetch('http://127.0.0.1:5000/api/shopping_cart', {
+				// make sure to use the correct URL
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 			})
 				.then((response) => response.json())
 				.then((data) => {
-					const totalQuantity = data.items.reduce(
+					const totalQuantity = data.cart.reduce(
 						(sum, item) => sum + item.quantity,
 						0
 					);
 					setCartItemCount(totalQuantity);
 				});
 		}
-	}, []);
+	}, [loggedIn]);
 
 	return (
 		<Router>
@@ -84,13 +90,20 @@ function App() {
 								</Button>
 							</>
 						)}
-						{loggedIn && userType === 'vendor' ? (
+						{loggedIn && userType === 'vendor' && (
 							<Button color='inherit'>
 								<Link to='/vendor-dashboard' className='nav-link'>
 									Vendor Dashboard
 								</Link>
 							</Button>
-						) : null}
+						)}
+						{loggedIn && userType === 'customer' && (
+							<Button color='inherit'>
+								<Link to='/order-history' className='nav-link'>
+									Order History
+								</Link>
+							</Button>
+						)}
 						<Badge color='error' badgeContent={cartItemCount}>
 							{cartItemCount > 0 ? (
 								<Link to='/checkout' className='nav-link'>
@@ -123,7 +136,12 @@ function App() {
 					/>
 
 					<Route path='/vendor-dashboard' element={<VendorDashboard />} />
-					<Route path='/checkout' element={<Checkout />} />
+					<Route
+						path='/checkout'
+						element={<Checkout onPlaceOrder={resetCartItemCount} />}
+					/>
+
+					<Route path='/order-history' element={<OrderHistory />} />
 
 					{/* Add other routes here */}
 				</Routes>

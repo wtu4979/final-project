@@ -13,7 +13,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
-const Checkout = () => {
+const Checkout = ({ onPlaceOrder }) => {
 	const [cartItems, setCartItems] = useState([]);
 	const [totalPrice, setTotalPrice] = useState(0);
 
@@ -135,6 +135,7 @@ const Checkout = () => {
 									// Handle the response data here
 									setCartItems([]);
 									setTotalPrice(0);
+									onPlaceOrder(); // Call `onPlaceOrder` after placing the order
 								})
 								.catch((error) => console.error('Error:', error));
 						}}

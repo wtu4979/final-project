@@ -15,9 +15,40 @@ import {
 	TableRow,
 	Paper,
 } from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const SalesHistory = () => {
 	const [sales, setSales] = useState([]);
+
+	const changeToShipping = async (sale_id) => {
+		try {
+			const response = await fetch(
+				`http://127.0.0.1:5000/change_status_to_shipping/${sale_id}`,
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+					},
+				}
+			);
+
+			const data = await response.json();
+
+			if (data.success) {
+				setSales(
+					sales.map((sale) =>
+						sale.id === sale_id ? { ...sale, status: 'Shipped' } : sale
+					)
+				);
+			} else {
+				console.error('Error changing status to shipping');
+			}
+		} catch (error) {
+			console.error('Error changing status to shipping:', error);
+		}
+	};
 
 	useEffect(() => {
 		const fetchSales = async () => {
@@ -58,7 +89,10 @@ const SalesHistory = () => {
 						<TableRow>
 							<TableCell align='left'>Product Name</TableCell>
 							<TableCell align='center'>Quantity Sold</TableCell>
+							<TableCell align='center'>Sold Price</TableCell>
 							<TableCell align='right'>Customer</TableCell>
+							<TableCell align='center'>Current Status</TableCell>
+							<TableCell align='center'>Change Status</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -71,7 +105,35 @@ const SalesHistory = () => {
 									{sale.product_name}
 								</TableCell>
 								<TableCell align='center'>{sale.quantity}</TableCell>
+								<TableCell align='center'>${sale.total_price}</TableCell>
 								<TableCell align='right'>{sale.customer_name}</TableCell>
+								<TableCell align='center'>
+									{sale.status}
+									{sale.status === 'Shipped' && (
+										<FontAwesomeIcon
+											icon={faCheckCircle}
+											style={{ color: 'green', marginLeft: '5px' }}
+										/>
+									)}
+									{sale.status === 'Processing' && (
+										<FontAwesomeIcon
+											icon={faSpinner}
+											spin
+											style={{ color: 'blue', marginLeft: '5px' }}
+										/>
+									)}
+								</TableCell>
+
+								<TableCell align='center'>
+									<Button
+										variant='contained'
+										color='primary'
+										disabled={sale.status === 'Shipped'}
+										onClick={() => changeToShipping(sale.id)}
+									>
+										Ship Order
+									</Button>
+								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
