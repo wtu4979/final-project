@@ -154,11 +154,11 @@ const VendorDashboard = () => {
 	const [productImage, setProductImage] = useState(null);
 	const [vendorRevenue, setVendorRevenue] = useState(null);
 
-	const [searchProductId, setSearchProductId] = useState(''); // for the input field
+	const [searchProductId, setSearchProductId] = useState('');
 	const [searchedProduct, setSearchedProduct] = useState(null);
 
-	const [searchOrderId, setSearchOrderId] = useState(''); // New state variable
-	const [searchedOrder, setSearchedOrder] = useState(null); // New state variable
+	const [searchOrderId, setSearchOrderId] = useState('');
+	const [searchedOrder, setSearchedOrder] = useState(null);
 
 	useEffect(() => {
 		const fetchVendorRevenue = async () => {
@@ -192,7 +192,7 @@ const VendorDashboard = () => {
 	const fetchOrderById = async () => {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:5000/get_order/${searchOrderId}`, // Change this to your actual API
+				`http://127.0.0.1:5000/get_order/${searchOrderId}`,
 				{
 					method: 'GET',
 					headers: {
@@ -402,7 +402,7 @@ const VendorDashboard = () => {
 					sx={{ marginTop: '20px', width: '100%' }}
 					variant='contained'
 					color='primary'
-					onClick={handleSearchOrder} // use the new search function
+					onClick={handleSearchOrder}
 				>
 					Search
 				</Button>

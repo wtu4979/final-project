@@ -35,7 +35,7 @@ function Homepage({ onAddToCart }) {
 			},
 			body: JSON.stringify({
 				productId: product.id,
-				quantity: 1, // Change this if you want to add more than 1 quantity
+				quantity: 1,
 			}),
 		})
 			.then((response) => response.json())

@@ -47,7 +47,7 @@ const Checkout = ({ onPlaceOrder }) => {
 						);
 					}
 				})
-				.catch((error) => console.error('Error:', error));
+				.catch((error) => console.error('Error removing from cart:', error));
 		}
 	};
 
@@ -81,7 +81,7 @@ const Checkout = ({ onPlaceOrder }) => {
 				});
 				setTotalPrice(total);
 			})
-			.catch((error) => console.error('Error:', error));
+			.catch((error) => console.error('Error consolidated cart items:', error));
 	}, []);
 
 	return (

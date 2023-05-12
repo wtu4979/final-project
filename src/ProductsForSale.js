@@ -84,7 +84,6 @@ const ProductsForSale = () => {
 		const responseData = await response.json();
 
 		if (!response.ok) {
-			// Handle error
 			console.error(responseData);
 			return;
 		}
