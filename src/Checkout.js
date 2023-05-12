@@ -141,7 +141,7 @@ const Checkout = ({ onPlaceOrder }) => {
 								})
 								.catch((error) => console.error('Error:', error));
 
-							navigate('/order-history');
+							navigate('/');
 						}}
 					>
 						Place Order
