@@ -46,7 +46,6 @@ function App() {
 		if (loggedIn) {
 			const token = localStorage.getItem('access_token');
 			fetch('http://127.0.0.1:5000/api/shopping_cart', {
-				// make sure to use the correct URL
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -58,6 +57,9 @@ function App() {
 						0
 					);
 					setCartItemCount(totalQuantity);
+				})
+				.catch((error) => {
+					console.error('Error fetching cart:', error);
 				});
 		}
 	}, [loggedIn]);

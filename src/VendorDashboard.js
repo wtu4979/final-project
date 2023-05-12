@@ -15,6 +15,7 @@ import {
 	TableRow,
 	Paper,
 } from '@mui/material';
+import ProductsForSale from './ProductsForSale';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -81,13 +82,15 @@ const SalesHistory = () => {
 			flexDirection='column'
 		>
 			<Typography variant='h4' gutterBottom component='div'>
-				Sold History
+				Sales History
 			</Typography>
 			<TableContainer component={Paper} style={{ maxWidth: '100%' }}>
 				<Table sx={{ minWidth: 650 }} aria-label='simple table'>
 					<TableHead>
 						<TableRow>
-							<TableCell align='left'>Product Name</TableCell>
+							<TableCell align='center'>Order ID</TableCell>
+
+							<TableCell align='center'>Product Name</TableCell>
 							<TableCell align='center'>Quantity Sold</TableCell>
 							<TableCell align='center'>Sold Price</TableCell>
 							<TableCell align='right'>Customer</TableCell>
@@ -101,7 +104,8 @@ const SalesHistory = () => {
 								key={sale.product_id + index}
 								sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 							>
-								<TableCell align='left' component='th' scope='row'>
+								<TableCell align='center'>{sale.id}</TableCell>
+								<TableCell align='center' component='th' scope='row'>
 									{sale.product_name}
 								</TableCell>
 								<TableCell align='center'>{sale.quantity}</TableCell>
@@ -150,6 +154,12 @@ const VendorDashboard = () => {
 	const [productImage, setProductImage] = useState(null);
 	const [vendorRevenue, setVendorRevenue] = useState(null);
 
+	const [searchProductId, setSearchProductId] = useState(''); // for the input field
+	const [searchedProduct, setSearchedProduct] = useState(null);
+
+	const [searchOrderId, setSearchOrderId] = useState(''); // New state variable
+	const [searchedOrder, setSearchedOrder] = useState(null); // New state variable
+
 	useEffect(() => {
 		const fetchVendorRevenue = async () => {
 			try {
@@ -177,6 +187,52 @@ const VendorDashboard = () => {
 		if (e.target.files && e.target.files[0]) {
 			setProductImage(e.target.files[0]);
 		}
+	};
+
+	const fetchOrderById = async () => {
+		try {
+			const response = await fetch(
+				`http://127.0.0.1:5000/get_order/${searchOrderId}`, // Change this to your actual API
+				{
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+					},
+				}
+			);
+			const data = await response.json();
+			setSearchedOrder(data.order);
+		} catch (error) {
+			console.error('Error fetching order:', error);
+			setSearchedOrder(null);
+		}
+	};
+
+	const handleSearchOrder = () => {
+		fetchOrderById();
+	};
+
+	const fetchProductById = async () => {
+		try {
+			const response = await fetch(
+				`http://127.0.0.1:5000/get_product/${searchProductId}`,
+				{
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+					},
+				}
+			);
+			const data = await response.json();
+			setSearchedProduct(data.product);
+		} catch (error) {
+			console.error('Error fetching product:', error);
+			setSearchedProduct(null);
+		}
+	};
+
+	const handleSearch = () => {
+		fetchProductById();
 	};
 
 	const handleSubmit = async (e) => {
@@ -276,6 +332,129 @@ const VendorDashboard = () => {
 					</Button>
 				</form>
 			</Grid>
+			<ProductsForSale></ProductsForSale>
+			<Box mb={2}>
+				<Typography variant='h6' gutterBottom>
+					Search for a Product by ID
+				</Typography>
+				<TextField
+					label='Product ID'
+					variant='outlined'
+					value={searchProductId}
+					onChange={(e) => setSearchProductId(e.target.value)}
+					fullWidth
+				/>
+				<Button
+					sx={{ marginTop: '20px', width: '100%' }}
+					variant='contained'
+					color='primary'
+					onClick={handleSearch}
+				>
+					Search
+				</Button>
+				{searchedProduct && (
+					<Box mt={3}>
+						<Typography variant='h6' gutterBottom>
+							Product Found:
+						</Typography>
+						<TableContainer component={Paper}>
+							<Table aria-label='simple table'>
+								<TableHead>
+									<TableRow>
+										<TableCell align='center'>Product ID</TableCell>
+										<TableCell align='center'>Name</TableCell>
+										<TableCell align='center'>Price</TableCell>
+										<TableCell align='center'>Description</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									<TableRow>
+										<TableCell component='th' scope='row' align='center'>
+											{searchedProduct.id}
+										</TableCell>
+										<TableCell align='center'>{searchedProduct.name}</TableCell>
+										<TableCell align='center'>
+											${searchedProduct.price}
+										</TableCell>
+										<TableCell align='center'>
+											{searchedProduct.description}
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</TableContainer>
+					</Box>
+				)}
+			</Box>
+
+			<Box mb={2}>
+				<Typography variant='h6' gutterBottom>
+					Search for an Order by ID
+				</Typography>
+				<TextField
+					label='Order ID'
+					variant='outlined'
+					value={searchOrderId}
+					onChange={(e) => setSearchOrderId(e.target.value)}
+					fullWidth
+				/>
+				<Button
+					sx={{ marginTop: '20px', width: '100%' }}
+					variant='contained'
+					color='primary'
+					onClick={handleSearchOrder} // use the new search function
+				>
+					Search
+				</Button>
+				{searchedOrder && (
+					<Box mt={3}>
+						<Typography variant='h6' gutterBottom>
+							Order Found:
+						</Typography>
+						<TableContainer component={Paper}>
+							<Table aria-label='simple table'>
+								<TableHead>
+									<TableRow>
+										<TableCell align='center'>Order ID</TableCell>
+										<TableCell align='center'>Product Name</TableCell>
+										<TableCell align='center'>Customer Name</TableCell>
+										<TableCell align='center'>Status</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									<TableRow>
+										<TableCell component='th' scope='row' align='center'>
+											{searchedOrder.id}
+										</TableCell>
+										<TableCell align='center'>
+											{searchedOrder.product_name}
+										</TableCell>
+										<TableCell align='center'>
+											{searchedOrder.customer_name}
+										</TableCell>
+										<TableCell align='center'>
+											{searchedOrder.status}
+											{searchedOrder.status === 'Shipped' && (
+												<FontAwesomeIcon
+													icon={faCheckCircle}
+													style={{ color: 'green', marginLeft: '5px' }}
+												/>
+											)}
+											{searchedOrder.status === 'Processing' && (
+												<FontAwesomeIcon
+													icon={faSpinner}
+													spin
+													style={{ color: 'blue', marginLeft: '5px' }}
+												/>
+											)}
+										</TableCell>
+									</TableRow>
+								</TableBody>
+							</Table>
+						</TableContainer>
+					</Box>
+				)}
+			</Box>
 			<SalesHistory></SalesHistory>
 		</Grid>
 	);

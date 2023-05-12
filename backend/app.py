@@ -364,6 +364,108 @@ def get_orders():
 
     return jsonify({'orders': output})
 
+@app.route('/get_products', methods=['GET'])
+def get_vendor_products():
+    products = Product.query.all()
+    output = []
+    for product in products:
+        product_data = {}
+        product_data['id'] = product.id
+        product_data['name'] = product.name
+        product_data['price'] = product.price
+        product_data['description'] = product.description
+        product_data['vendor_id'] = product.vendor_id
+        product_data['vendor_name'] = product.vendor_name
+        output.append(product_data)
+    return jsonify({'products': output})
+
+@app.route('/update-product/<int:product_id>', methods=['PUT'])
+@jwt_required()
+def update_product(product_id):
+    # Get product by id
+    product = Product.query.get(product_id)
+    
+    # If product is not found
+    if product is None:
+        return jsonify({'error': 'Product not found'}), 404
+
+    # Get current vendor id
+    current_vendor_id = get_jwt_identity()
+
+    # If the product doesn't belong to the current vendor
+    if product.vendor_id != current_vendor_id:
+        return jsonify({'error': 'You do not have permission to update this product'}), 403
+
+    data = request.get_json()
+
+    # Update product details
+    if 'name' in data:
+        product.name = data['name']
+    if 'price' in data:
+        product.price = data['price']
+    if 'description' in data:
+        product.description = data['description']
+
+    db.session.commit()
+
+    return jsonify({'message': 'Product updated'}), 200
+
+@app.route('/get_product/<int:productId>', methods=['GET'])
+def get_product(productId):
+    product = Product.query.get(productId)
+    if product is None:
+        return jsonify({'error': 'Product not found'}), 404
+
+    product_data = {}
+    product_data['id'] = product.id
+    product_data['name'] = product.name
+    product_data['price'] = product.price
+    product_data['description'] = product.description
+    product_data['vendor_id'] = product.vendor_id
+    product_data['vendor_name'] = product.vendor_name
+
+    return jsonify({'product': product_data}), 200
+
+@app.route('/get_order/<int:orderId>', methods=['GET'])
+def get_order(orderId):
+    order = Sale.query.get(orderId)
+    if order is None:
+        return jsonify({'error': 'Order not found'}), 404
+
+    order_data = {}
+    order_data['id'] = order.id
+    order_data['product_name'] = order.product_name
+    order_data['customer_name'] = order.customer_name
+    order_data['quantity'] = order.quantity
+    order_data['total_price'] = order.total_price
+    order_data['status'] = order.status
+
+    return jsonify({'order': order_data}), 200
+
+
+
+@app.route('/delete-product/<int:product_id>', methods=['DELETE'])
+@jwt_required()
+def delete_product(product_id):
+    # Get product by id
+    product = Product.query.get(product_id)
+    
+    # If product is not found
+    if product is None:
+        return jsonify({'error': 'Product not found'}), 404
+
+    # Get current vendor id
+    current_vendor_id = get_jwt_identity()
+
+    # If the product doesn't belong to the current vendor
+    if product.vendor_id != current_vendor_id:
+        return jsonify({'error': 'You do not have permission to delete this product'}), 403
+
+    # Delete product
+    db.session.delete(product)
+    db.session.commit()
+
+    return jsonify({'message': 'Product deleted'}), 200
 
 
 if __name__ == '__main__':

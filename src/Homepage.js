@@ -19,7 +19,10 @@ function Homepage({ onAddToCart }) {
 	useEffect(() => {
 		fetch('http://127.0.0.1:5000/products')
 			.then((response) => response.json())
-			.then((data) => setProducts(data.products));
+			.then((data) => setProducts(data.products))
+			.catch((error) => {
+				console.error('Error fetching products:', error);
+			});
 	}, []);
 
 	const addToCart = (product) => {
@@ -40,6 +43,9 @@ function Homepage({ onAddToCart }) {
 				console.log(`Product ${product.id} added to cart`);
 				handleAddToCart();
 				setSnackbarOpen(true);
+			})
+			.catch((error) => {
+				console.error('Error adding product to cart:', error);
 			});
 	};
 
