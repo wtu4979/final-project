@@ -12,10 +12,13 @@ import {
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = ({ onPlaceOrder }) => {
 	const [cartItems, setCartItems] = useState([]);
 	const [totalPrice, setTotalPrice] = useState(0);
+
+	const navigate = useNavigate();
 
 	const removeFromCart = (cartItemId) => {
 		const itemToRemove = cartItems.find(
@@ -132,12 +135,13 @@ const Checkout = ({ onPlaceOrder }) => {
 								.then((response) => response.json())
 								.then((data) => {
 									console.log(data);
-									// Handle the response data here
 									setCartItems([]);
 									setTotalPrice(0);
-									onPlaceOrder(); // Call `onPlaceOrder` after placing the order
+									onPlaceOrder();
 								})
 								.catch((error) => console.error('Error:', error));
+
+							navigate('/order-history');
 						}}
 					>
 						Place Order
