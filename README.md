@@ -12,3 +12,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 ## API Documentation
 
 To see API Documentation using Swagger, you can open [http://127.0.0.1:5000/apidocs/] to view it in your browser.
+
+## Database Schema Diagram
+![Database Schema Diagram](https://github.com/wtu4979/final-project/blob/main/diagram.PNG)
+
