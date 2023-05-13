@@ -5,14 +5,44 @@
   <strong>Created by: Wilson Tu</strong>
 </p>
 
-## Available Scripts
+## 🚀 Getting Started
 
-In the project directory, you can run:
+To get a local copy up and running, you'll need [Node.js](https://nodejs.org/) and [Python](https://www.python.org/downloads/) installed on your computer. From your command line:
 
-### `npm start`
+```bash
+# Clone this repository
+$ git clone https://github.com/wtu4979/final-project.git
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+# Go into the repository
+$ cd final-project
+
+# Go to backend folder
+$ cd backend
+
+# Create a Python virtual environment (Optional but recommended)
+$ python3 -m venv env
+
+# Activate the virtual environment
+# On Windows:
+$ .\env\Scripts\activate
+# On Unix or MacOS:
+$ source env/bin/activate
+
+# Install Python dependencies
+$ pip install -r requirements.txt
+
+# Run the app
+$ python app.py
+
+# Go back to root repository
+$ cd ..
+
+# Install dependencies
+$ npm install
+
+# Run the app
+$ npm start
+```
 
 ## 📚 API Documentation
 
