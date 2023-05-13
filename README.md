@@ -1,4 +1,5 @@
-# CPSC 449 - Web Back-End Engineering: Final Project by Wilson Tu
+# CPSC 449 - Web Back-End Engineering: Final Project
+by Wilson Tu
 
 ## Available Scripts
 
